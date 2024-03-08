@@ -1,15 +1,11 @@
 version: '3.4'
 
-networks:
-  dev:
-    driver: bridge
-
 services:
-  subsetsix_api:
+  subsetsix.api:
     image: ${DOCKER_REGISTRY-}subsetsixapi
-    container_name: "subsetsix-api"
+    container_name: "subsetsix.api"
     depends_on:
-      - "subsetsix_db"
+      - "subsetsix.db"
     build:
       context: .
       dockerfile: src/Subsetsix.Api/Dockerfile
@@ -17,20 +13,14 @@ services:
       - "54233:8080"
       - "54234:8081"
 
-  subsetsix_db:
+  subsetsix.db:
     image: postgres:latest
-    container_name: "subsetsix-db"
+    container_name: "subsetsix.db"
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=subsetsix
     ports:
       - "5432:5432"
-    restart: always
     volumes:
-      - app_data:/var/lib/postgresql/data
-    networks:
-      - dev
-
-volumes:
-  app_data:
+      - ./.containers/subsetsix-db:/var/lib/postgresql/data

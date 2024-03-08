@@ -1,53 +1,140 @@
+using Marten;
+using Marten.Events;
+using Marten.Events.Projections;
+using Microsoft.AspNetCore.Mvc;
+using Weasel.Core;
 
-namespace Subsetsix.Api
+namespace Subsetsix.Api;
+
+public static class Program
 {
-    public class Program
+    public static void Main(string[] args)
     {
-        public static void Main(string[] args)
+        var builder = WebApplication.CreateBuilder(args);
+
+        builder.Services.AddAuthorization();
+
+        builder.Services.AddMarten(options =>
         {
-            var builder = WebApplication.CreateBuilder(args);
+            options.Connection(builder.Configuration.GetConnectionString("DbConnection")!);
+            options.Projections.Snapshot<Pet>(SnapshotLifecycle.Inline);
 
-            // Add services to the container.
-            builder.Services.AddAuthorization();
-
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
-
-            var app = builder.Build();
-
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
+            if (builder.Environment.IsDevelopment())
             {
-                app.UseSwagger();
-                app.UseSwaggerUI();
+                options.AutoCreateSchemaObjects = AutoCreate.All;
             }
+        });
 
-            app.UseHttpsRedirection();
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen();
 
-            app.UseAuthorization();
+        var app = builder.Build();
 
-            var summaries = new[]
-            {
-                "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-            };
+        if (app.Environment.IsDevelopment())
+        {
+            app.UseSwagger();
+            app.UseSwaggerUI();
+        }
 
-            app.MapGet("/weatherforecast", (HttpContext httpContext) =>
+        app.UseHttpsRedirection();
+
+        app.UseAuthorization();
+
+        var summaries = new[]
+        {
+            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
+        };
+
+        app.MapGet("/weatherforecast", (HttpContext httpContext) =>
             {
                 var forecast = Enumerable.Range(1, 5).Select(index =>
-                    new WeatherForecast
-                    {
-                        Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                        TemperatureC = Random.Shared.Next(-20, 55),
-                        Summary = summaries[Random.Shared.Next(summaries.Length)]
-                    })
+                        new WeatherForecast
+                        {
+                            Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
+                            TemperatureC = Random.Shared.Next(-20, 55),
+                            Summary = summaries[Random.Shared.Next(summaries.Length)]
+                        })
                     .ToArray();
                 return forecast;
             })
             .WithName("GetWeatherForecast")
             .WithOpenApi();
 
-            app.Run();
-        }
+        app.MapPost("/user",
+            async (CreateUserRequest create, [FromServices] IDocumentSession  session) =>
+            {
+                var petCreated = new PetCreated()
+                {
+                    Name = create.FirstName
+                };
+
+                var petRenamed = new PetRenamed()
+                {
+                    Name = create.LastName
+                };
+
+                var id = session.Events.StartStream<Pet>(petCreated, petRenamed).Id;
+
+                await session.SaveChangesAsync();
+
+                // await using var session = store.LightweightSession();
+                //
+                // var user = new User {
+                //     FirstName = create.FirstName,
+                //     LastName = create.LastName
+                // };
+                // session.Store(user);
+                //
+                // await session.SaveChangesAsync();
+            });
+
+        app.MapGet("/users",
+            async ([FromServices] IDocumentStore store, CancellationToken ct) =>
+            {
+                await using var session = store.QuerySession();
+
+                return await session.Query<Pet>().ToListAsync(ct);
+            });
+
+        app.Run();
     }
+}
+
+public record CreateUserRequest(string FirstName, string LastName);
+
+public class User
+{
+    public Guid Id { get; set; }
+
+    public required string FirstName { get; set; }
+    public required string LastName { get; set; }
+}
+
+public class Pet
+{
+    public Guid Id { get; set; }
+    public int Version { get; set; }
+    public required string Name { get; set; }
+    public required DateTimeOffset Date { get; set; }
+
+    public void Apply(IEvent<PetCreated> @event)
+    {
+        Date = @event.Timestamp;
+        Name = @event.Data.Name;
+    }
+
+    public void Apply(PetRenamed @event)
+    {
+        Name = @event.Name;
+    }
+}
+
+public class PetCreated
+{
+    public required string Name { get; set; }
+}
+
+public class PetRenamed
+{
+    public required string Name { get; set; }
 }

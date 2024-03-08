@@ -1,7 +1,7 @@
 version: '3.4'
 
 services:
-  subsetsix_api:
+  subsetsix.api:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
