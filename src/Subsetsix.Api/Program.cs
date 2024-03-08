@@ -1,8 +1,8 @@
 using Marten;
 using Marten.Events;
 using Marten.Events.Projections;
+using Marten.Services.Json;
 using Microsoft.AspNetCore.Mvc;
-using Weasel.Core;
 
 namespace Subsetsix.Api;
 
@@ -17,13 +17,11 @@ public static class Program
         builder.Services.AddMarten(options =>
         {
             options.Connection(builder.Configuration.GetConnectionString("DbConnection")!);
-            options.Projections.Snapshot<Pet>(SnapshotLifecycle.Inline);
 
-            if (builder.Environment.IsDevelopment())
-            {
-                options.AutoCreateSchemaObjects = AutoCreate.All;
-            }
-        });
+            options.UseDefaultSerialization(serializerType: SerializerType.SystemTextJson);
+
+            options.Projections.Snapshot<Pet>(SnapshotLifecycle.Inline);
+        }).OptimizeArtifactWorkflow();
 
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
