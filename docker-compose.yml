@@ -1,0 +1,9 @@
+version: '3.4'
+
+services:
+  subsetsix.api:
+    image: ${DOCKER_REGISTRY-}subsetsixapi
+    container_name: subsetsix-api
+    build:
+      context: .
+      dockerfile: src/Subsetsix.Api/Dockerfile
