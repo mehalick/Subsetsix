@@ -30,3 +30,7 @@ artifacts/
 # NPM
 node_modules
 **/wwwroot/dist/
+
+# CDK asset staging directory
+.cdk.staging
+cdk.out

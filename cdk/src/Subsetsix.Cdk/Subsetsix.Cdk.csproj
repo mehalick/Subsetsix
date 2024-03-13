@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <!-- Roll forward to future major versions of the netcoreapp as needed -->
+    <RollForward>Major</RollForward>
+    <LangVersion>default</LangVersion>
+    <UserSecretsId>36fff8fb-f71b-41b1-82e8-7cbb1e30dc21</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- CDK Construct Library dependencies -->
+    <PackageReference Include="Amazon.CDK.Lib" Version="2.81.0" />
+    <PackageReference Include="Constructs" Version="[10.0.0,11.0.0)" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="8.0.0" />
+
+    <!-- jsii Roslyn analyzers (un-comment to obtain compile-time checks for missing required props
+    <PackageReference Include="Amazon.Jsii.Analyzers" Version="*" PrivateAssets="all" />
+    -->
+  </ItemGroup>
+
+</Project>

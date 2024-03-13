@@ -61,12 +61,12 @@ public static class Program
         app.MapPost("/user",
             async (CreateUserRequest create, [FromServices] IDocumentSession  session) =>
             {
-                var petCreated = new PetCreated()
+                var petCreated = new PetCreated
                 {
                     Name = create.FirstName
                 };
 
-                var petRenamed = new PetRenamed()
+                var petRenamed = new PetRenamed
                 {
                     Name = create.LastName
                 };
@@ -74,16 +74,6 @@ public static class Program
                 var id = session.Events.StartStream<Pet>(petCreated, petRenamed).Id;
 
                 await session.SaveChangesAsync();
-
-                // await using var session = store.LightweightSession();
-                //
-                // var user = new User {
-                //     FirstName = create.FirstName,
-                //     LastName = create.LastName
-                // };
-                // session.Store(user);
-                //
-                // await session.SaveChangesAsync();
             });
 
         app.MapGet("/users",
