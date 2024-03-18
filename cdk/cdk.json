@@ -1,5 +1,6 @@
 {
   "app": "dotnet run --project src/Subsetsix.Cdk/Subsetsix.Cdk.csproj",
+  "profile": "subsetsix",
   "watch": {
     "include": [
       "**"

@@ -8,7 +8,7 @@ namespace Subsetsix.Api;
 
 public static class Program
 {
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
 
@@ -20,7 +20,7 @@ public static class Program
 
             options.UseDefaultSerialization(serializerType: SerializerType.SystemTextJson);
 
-            options.Projections.Snapshot<Pet>(SnapshotLifecycle.Inline);
+            options.Projections.Snapshot<Project>(SnapshotLifecycle.Inline);
         }).OptimizeArtifactWorkflow();
 
         builder.Services.AddEndpointsApiExplorer();
@@ -58,71 +58,58 @@ public static class Program
             .WithName("GetWeatherForecast")
             .WithOpenApi();
 
-        app.MapPost("/user",
-            async (CreateUserRequest create, [FromServices] IDocumentSession  session) =>
+        app.MapPost("/project",
+            async (CreateProjectRequest create, [FromServices] IDocumentSession  session) =>
             {
-                var petCreated = new PetCreated
+                var projectCreated = new ProjectCreated
                 {
-                    Name = create.FirstName
+                    Name = create.Name
                 };
 
-                var petRenamed = new PetRenamed
-                {
-                    Name = create.LastName
-                };
-
-                var id = session.Events.StartStream<Pet>(petCreated, petRenamed).Id;
+                var id = session.Events.StartStream<Project>(projectCreated).Id;
 
                 await session.SaveChangesAsync();
             });
 
-        app.MapGet("/users",
+        app.MapGet("/projects",
             async ([FromServices] IDocumentStore store, CancellationToken ct) =>
             {
                 await using var session = store.QuerySession();
 
-                return await session.Query<Pet>().ToListAsync(ct);
+                return await session.Query<Project>().ToListAsync(ct);
             });
 
-        app.Run();
+        await app.RunAsync();
     }
 }
 
-public record CreateUserRequest(string FirstName, string LastName);
+public record CreateProjectRequest(string Name);
 
-public class User
-{
-    public Guid Id { get; set; }
-
-    public required string FirstName { get; set; }
-    public required string LastName { get; set; }
-}
-
-public class Pet
+public class Project
 {
     public Guid Id { get; set; }
     public int Version { get; set; }
     public required string Name { get; set; }
-    public required DateTimeOffset Date { get; set; }
+    public required DateTimeOffset AddedUtc { get; set; }
 
-    public void Apply(IEvent<PetCreated> @event)
+    public void Apply(IEvent<ProjectCreated> @event)
     {
-        Date = @event.Timestamp;
+        AddedUtc = @event.Timestamp;
         Name = @event.Data.Name;
     }
 
-    public void Apply(PetRenamed @event)
+    public void Apply(ProjectRenamed @event)
     {
         Name = @event.Name;
     }
 }
 
-public class PetCreated
+public class ProjectCreated
 {
     public required string Name { get; set; }
 }
 
-public class PetRenamed
+public class ProjectRenamed
 {
     public required string Name { get; set; }
 }
