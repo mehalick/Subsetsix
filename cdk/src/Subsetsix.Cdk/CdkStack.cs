@@ -1,5 +1,7 @@
 using Amazon.CDK;
 using Amazon.CDK.AWS.EC2;
+using Amazon.CDK.AWS.ECS;
+using Amazon.CDK.AWS.ECS.Patterns;
 using Amazon.CDK.AWS.RDS;
 using Constructs;
 using InstanceType = Amazon.CDK.AWS.EC2.InstanceType;
@@ -9,6 +11,14 @@ namespace Subsetsix.Cdk;
 public class CdkStack : Stack
 {
     internal CdkStack(Construct scope, string id, IStackProps props = null) : base(scope, id, props)
+    {
+        var vpc = CreateVpc();
+
+        CreateFargateCluster(vpc);
+        CreateAuroraDatabase(vpc);
+    }
+
+    private Vpc CreateVpc()
     {
         var vpc = new Vpc(this, "SubsetsixVpc", new VpcProps
         {
@@ -30,9 +40,29 @@ public class CdkStack : Stack
                 }
             ]
         });
+        return vpc;
+    }
 
-        var bastionHost = CreateBastionHost(vpc);
-        CreateDatabase(vpc, bastionHost);
+    private void CreateFargateCluster(IVpc vpc)
+    {
+        var cluster = new Cluster(this, "SubsetsixFargateCluster", new ClusterProps
+        {
+            Vpc = vpc
+        });
+
+        _ = new ApplicationLoadBalancedFargateService(this, "SubsetsixFargateService",
+            new ApplicationLoadBalancedFargateServiceProps
+            {
+                Cluster = cluster,
+                DesiredCount = 1,
+                TaskImageOptions = new ApplicationLoadBalancedTaskImageOptions
+                {
+                    Image = ContainerImage.FromRegistry("amazon/amazon-ecs-sample")
+                },
+                MemoryLimitMiB = 2048,
+                PublicLoadBalancer = true
+            }
+        );
     }
 
     private BastionHostLinux CreateBastionHost(IVpc vpc)
@@ -46,8 +76,10 @@ public class CdkStack : Stack
         return host;
     }
 
-    private void CreateDatabase(IVpc vpc, BastionHostLinux bastionHost)
+    private void CreateAuroraDatabase(IVpc vpc)
     {
+        var bastionHost = CreateBastionHost(vpc);
+
         var secret = new DatabaseSecret(this, "SubsetsixDbSecret", new DatabaseSecretProps
         {
             Username = "postgres",
