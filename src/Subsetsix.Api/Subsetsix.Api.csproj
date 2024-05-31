@@ -8,13 +8,19 @@
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>..\..</DockerfileContext>
     <DockerComposeProjectPath>..\..\docker-compose.dcproj</DockerComposeProjectPath>
+    <LangVersion>default</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Marten" Version="7.4.0" />
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.3" />
-    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.6" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    <PackageReference Include="Aspire.Npgsql" Version="8.0.1" />
+    <PackageReference Include="Marten" Version="7.18.0" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.6" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.20.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Subsetsix.ServiceDefaults\Subsetsix.ServiceDefaults.csproj" />
   </ItemGroup>
 
 </Project>

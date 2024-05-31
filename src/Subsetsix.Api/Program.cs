@@ -1,7 +1,6 @@
 using Marten;
 using Marten.Events;
 using Marten.Events.Projections;
-using Marten.Services.Json;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Subsetsix.Api;
@@ -12,21 +11,27 @@ public static class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
+        builder.AddServiceDefaults();
+        builder.AddNpgsqlDataSource("subsetsix");
+
         builder.Services.AddAuthorization();
 
         builder.Services.AddMarten(options =>
-        {
-            options.Connection(builder.Configuration.GetConnectionString("DbConnection")!);
-            options.UseDefaultSerialization(serializerType: SerializerType.SystemTextJson);
+            {
+                options.UseSystemTextJsonForSerialization();
 
-            options.Projections.Snapshot<Project>(SnapshotLifecycle.Inline);
+                options.Projections.Snapshot<Project>(SnapshotLifecycle.Inline);
 
-        }).OptimizeArtifactWorkflow();
+            })
+            .UseNpgsqlDataSource()
+            .OptimizeArtifactWorkflow();
 
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
         var app = builder.Build();
+
+        app.MapDefaultEndpoints();
 
         if (app.Environment.IsDevelopment())
         {
@@ -68,7 +73,7 @@ public record CreateProjectRequest(string Name);
 public class Project
 {
     public Guid Id { get; set; }
-    public int Version { get; set; }
+    //public Guid Version { get; set; }
     public required string Name { get; set; }
     public required DateTimeOffset AddedUtc { get; set; }
 

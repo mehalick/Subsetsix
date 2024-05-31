@@ -1,5 +1,3 @@
-version: '3.4'
-
 services:
   subsetsix.api:
     image: ${DOCKER_REGISTRY-}subsetsixapi
@@ -10,8 +8,8 @@ services:
       context: .
       dockerfile: src/Subsetsix.Api/Dockerfile
     ports:
-      - "54233:8080"
-      - "54234:8081"
+      - "54233:80"
+      - "54234:443"
 
   subsetsix.db:
     image: postgres:latest
