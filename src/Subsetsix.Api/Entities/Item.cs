@@ -16,8 +16,8 @@ public class EntityBase
 public class Item : EntityBase
 {
     public required string Title { get; set; }
-    public required string Description { get; set; }
-    public required List<string> Tags { get; set; }
+    public string Description { get; set; } = "";
+    public List<string> Tags { get; set; } = [];
 
     public void Apply(ItemAdded itemAdded)
     {
@@ -29,7 +29,7 @@ public class Item : EntityBase
 
 public class ItemAdded
 {
-    public required string Title { get; set; }
-    public required string Description { get; set; }
-    public required List<string> Tags { get; set; }
+    public required string Title { get; init; }
+    public string Description { get; init; } = "";
+    public List<string> Tags { get; init; } = [];
 }

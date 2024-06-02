@@ -43,7 +43,7 @@ public static class Program
 
         app.UseHttpsRedirection();
         app.UseAuthorization();
-        app.UseFastEndpoints();
+        app.UseFastEndpoints(i => i.Errors.UseProblemDetails());
 
         await app.RunAsync();
     }

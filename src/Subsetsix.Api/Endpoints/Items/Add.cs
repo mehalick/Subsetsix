@@ -1,3 +1,5 @@
+using FluentValidation;
+
 namespace Subsetsix.Api.Endpoints.Items;
 
 [HttpPost("items.add")]
@@ -6,9 +8,17 @@ public class Add: Endpoint<Add.AddRequest, Add.AddResponse>
 {
     public class AddRequest
     {
-        public required string Title { get; set; }
-        public required string Description { get; set; }
-        public required List<string> Tags { get; set; }
+        public required string Title { get; init; }
+        public string Description { get; init; } = "";
+        public List<string> Tags { get; init; } = [];
+    }
+
+    public class AddRequestValidator : Validator<AddRequest>
+    {
+        public AddRequestValidator()
+        {
+            RuleFor(x => x.Title).NotEmpty();
+        }
     }
 
     public class AddResponse(Guid id)
