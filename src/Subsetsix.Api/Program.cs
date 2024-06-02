@@ -1,7 +1,8 @@
-using Marten;
-using Marten.Events;
+global using FastEndpoints;
+global using Marten;
+global using Subsetsix.Api.Entities;
+global using Microsoft.AspNetCore.Authorization;
 using Marten.Events.Projections;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Subsetsix.Api;
 
@@ -20,7 +21,7 @@ public static class Program
             {
                 options.UseSystemTextJsonForSerialization();
 
-                options.Projections.Snapshot<Project>(SnapshotLifecycle.Inline);
+                options.Projections.Snapshot<Item>(SnapshotLifecycle.Inline);
 
             })
             .UseNpgsqlDataSource()
@@ -28,6 +29,7 @@ public static class Program
 
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
+        builder.Services.AddFastEndpoints();
 
         var app = builder.Build();
 
@@ -40,61 +42,9 @@ public static class Program
         }
 
         app.UseHttpsRedirection();
-
         app.UseAuthorization();
-
-        app.MapPost("/project",
-            async (CreateProjectRequest create, [FromServices] IDocumentSession  session) =>
-            {
-                var projectCreated = new ProjectCreated
-                {
-                    Name = create.Name
-                };
-
-                var id = session.Events.StartStream<Project>(projectCreated).Id;
-
-                await session.SaveChangesAsync();
-            });
-
-        app.MapGet("/projects",
-            async ([FromServices] IDocumentStore store, CancellationToken ct) =>
-            {
-                await using var session = store.QuerySession();
-
-                return await session.Query<Project>().ToListAsync(ct);
-            });
+        app.UseFastEndpoints();
 
         await app.RunAsync();
     }
-}
-
-public record CreateProjectRequest(string Name);
-
-public class Project
-{
-    public Guid Id { get; set; }
-    //public Guid Version { get; set; }
-    public required string Name { get; set; }
-    public required DateTimeOffset AddedUtc { get; set; }
-
-    public void Apply(IEvent<ProjectCreated> @event)
-    {
-        AddedUtc = @event.Timestamp;
-        Name = @event.Data.Name;
-    }
-
-    public void Apply(ProjectRenamed @event)
-    {
-        Name = @event.Name;
-    }
-}
-
-public class ProjectCreated
-{
-    public required string Name { get; set; }
-}
-
-public class ProjectRenamed
-{
-    public required string Name { get; set; }
 }

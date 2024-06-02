@@ -1,8 +1,10 @@
-# IDEs
+# Tooling
 .vs/
 .vscode/
 .idea/
+.containers/
 .dev/
+.data/
 
 # User-specific files
 *.suo
@@ -26,7 +28,6 @@ msbuild.log
 msbuild.err
 msbuild.wrn
 artifacts/
-.containers/
 
 # NPM
 node_modules

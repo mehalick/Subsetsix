@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <PackageReference Include="Aspire.Npgsql" Version="8.0.1" />
+    <PackageReference Include="FastEndpoints" Version="5.26.0" />
     <PackageReference Include="Marten" Version="7.18.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.6" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.20.1" />
@@ -21,6 +22,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Subsetsix.ServiceDefaults\Subsetsix.ServiceDefaults.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Endpoints\" />
+    <Folder Include="Internal\" />
   </ItemGroup>
 
 </Project>

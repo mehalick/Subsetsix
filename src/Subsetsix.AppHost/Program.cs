@@ -3,8 +3,11 @@ var builder = DistributedApplication.CreateBuilder(args);
 
 const string databaseName = "subsetsix";
 
-var database = builder.AddPostgres("postgres")
+var password = builder.AddParameter("postgresql-password", secret: true);
+
+var database = builder.AddPostgres("postgres", password: password)
     .WithEnvironment("POSTGRES_DB", databaseName)
+    .WithBindMount("./.data/postgres", "/var/lib/postgresql/data")
     .WithPgAdmin()
     .AddDatabase(databaseName);
 
