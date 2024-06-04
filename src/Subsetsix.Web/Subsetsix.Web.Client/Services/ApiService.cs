@@ -14,7 +14,7 @@ public class ApiService
 
     public async Task<List<ItemsListResponseItem>> Get()
     {
-        var items = await _httpClient.GetFromJsonAsync<List<ItemsListResponseItem>>("items.list");
+        var items = await _httpClient.GetFromJsonAsync<List<ItemsListResponseItem>>(EndpointRoutes.ItemsList);
 
         return items!;
     }
