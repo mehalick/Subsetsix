@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Subsetsix.Api.Common\Subsetsix.Api.Common.csproj" />
     <ProjectReference Include="..\Subsetsix.ServiceDefaults\Subsetsix.ServiceDefaults.csproj" />
   </ItemGroup>
 

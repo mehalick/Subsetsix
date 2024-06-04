@@ -1,10 +1,10 @@
 ﻿@page "/"
+@using Microsoft.AspNetCore.Components.QuickGrid
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
-
-@if (_message is not null)
-{
-    <p>@_message</p>
-}
+<QuickGrid Items="@_items">
+    <PropertyColumn Property="@(p => p.Title)" />
+    <PropertyColumn Property="@(p => p.Description)" />
+    <PropertyColumn Property="@(p => string.Join(", ", p.Tags))" />
+</QuickGrid>

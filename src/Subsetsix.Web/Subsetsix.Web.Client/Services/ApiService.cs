@@ -1,3 +1,6 @@
+using Subsetsix.Api.Common;
+using System.Net.Http.Json;
+
 namespace Subsetsix.Web.Client.Services;
 
 public class ApiService
@@ -9,8 +12,10 @@ public class ApiService
         _httpClient = httpClient;
     }
 
-    public async Task<string> Get()
+    public async Task<List<ItemsListResponseItem>> Get()
     {
-        return await _httpClient.GetStringAsync("items.list");
+        var items = await _httpClient.GetFromJsonAsync<List<ItemsListResponseItem>>("items.list");
+
+        return items!;
     }
 }

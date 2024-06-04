@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Subsetsix.Web", "src\Subset
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Subsetsix.Web.Client", "src\Subsetsix.Web\Subsetsix.Web.Client\Subsetsix.Web.Client.csproj", "{F5CD1767-1B6F-41A9-813C-EF200789125F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Subsetsix.Api.Common", "src\Subsetsix.Api.Common\Subsetsix.Api.Common.csproj", "{BAC207CC-4B0C-4603-8A46-7A682EA4BA94}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -53,6 +55,10 @@ Global
 		{F5CD1767-1B6F-41A9-813C-EF200789125F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F5CD1767-1B6F-41A9-813C-EF200789125F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F5CD1767-1B6F-41A9-813C-EF200789125F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BAC207CC-4B0C-4603-8A46-7A682EA4BA94}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BAC207CC-4B0C-4603-8A46-7A682EA4BA94}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BAC207CC-4B0C-4603-8A46-7A682EA4BA94}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BAC207CC-4B0C-4603-8A46-7A682EA4BA94}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

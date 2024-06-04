@@ -1,8 +1,10 @@
+using Subsetsix.Api.Common;
+
 namespace Subsetsix.Api.Endpoints.Items;
 
 [HttpGet("items.list")]
 [AllowAnonymous]
-public class List: EndpointWithoutRequest<IReadOnlyList<Item>>
+public class List: EndpointWithoutRequest<IReadOnlyList<ItemsListResponseItem>>
 {
     private readonly IQuerySession _session;
 
@@ -15,6 +17,15 @@ public class List: EndpointWithoutRequest<IReadOnlyList<Item>>
     {
         var items = await _session.Query<Item>().ToListAsync(ct);
 
-        await SendAsync(items, cancellation: ct);
+        var results = items
+            .Select(i => new ItemsListResponseItem
+            {
+                Title = i.Title,
+                Description = i.Description,
+                Tags = i.Tags
+            })
+            .ToList();
+
+        await SendAsync(results, cancellation: ct);
     }
 }
