@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Subsetsix.Api\Subsetsix.Api.csproj" />
+    <ProjectReference Include="..\Subsetsix.Web\Subsetsix.Web\Subsetsix.Web.csproj" />
   </ItemGroup>
 
 </Project>

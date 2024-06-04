@@ -11,7 +11,10 @@ var database = builder.AddPostgres("postgres", password: password, port: 53888)
     .WithPgAdmin()
     .AddDatabase(databaseName);
 
-builder.AddProject<Projects.Subsetsix_Api>("subsetsix-api")
+var api = builder.AddProject<Projects.Subsetsix_Api>("subsetsix-api")
     .WithReference(database);
+
+builder.AddProject<Projects.Subsetsix_Web>("subsetsix-web")
+    .WithReference(api);
 
 builder.Build().Run();
