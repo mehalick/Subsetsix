@@ -2,7 +2,7 @@ using Subsetsix.Api.Common;
 
 namespace Subsetsix.Api.Endpoints.Items;
 
-public class List(IQuerySession session): EndpointWithoutRequest<IReadOnlyList<ItemsListResponseItem>>
+public class List: EndpointWithoutRequest<IReadOnlyList<ItemsListResponseItem>>
 {
     public override void Configure()
     {
@@ -13,16 +13,14 @@ public class List(IQuerySession session): EndpointWithoutRequest<IReadOnlyList<I
 
     public override async Task HandleAsync(CancellationToken ct)
     {
-        var items = await session.Query<Item>().ToListAsync(ct);
-
-        var results = items
-            .Select(i => new ItemsListResponseItem
+        var results = new List<ItemsListResponseItem>
+        {
+            new ItemsListResponseItem()
             {
-                Title = i.Title,
-                Description = i.Description,
-                Tags = i.Tags
-            })
-            .ToList();
+                Title = "test",
+                Description = "description"
+            }
+        };
 
         await SendAsync(results, cancellation: ct);
     }

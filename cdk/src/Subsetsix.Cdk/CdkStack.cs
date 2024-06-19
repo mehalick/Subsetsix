@@ -1,14 +1,11 @@
 using Amazon.CDK;
 using Amazon.CDK.AWS.EC2;
 using Amazon.CDK.AWS.ECR;
-using Amazon.CDK.AWS.Ecr.Assets;
 using Amazon.CDK.AWS.ECS;
 using Amazon.CDK.AWS.ECS.Patterns;
 using Amazon.CDK.AWS.IAM;
 using Amazon.CDK.AWS.RDS;
 using Constructs;
-using System.IO;
-using HealthCheck = Amazon.CDK.AWS.ElasticLoadBalancingV2.HealthCheck;
 using InstanceType = Amazon.CDK.AWS.EC2.InstanceType;
 
 namespace Subsetsix.Cdk;
@@ -61,50 +58,35 @@ public class CdkStack : Stack
             RepositoryName = "subsetsix-api-repository"
         });
 
-        var asset = new DockerImageAsset(this, "SubsetsixApiDockerImage", new DockerImageAssetProps
-        {
-            Directory = Path.Combine(Directory.GetCurrentDirectory(), "../src/Subsetsix.Api"),
-            File = "Dockerfile",
-            Platform = Platform_.LINUX_ARM64
-        });
-
         var taskRole = new Role(this, "SubsetsixTaskRole", new RoleProps
         {
             AssumedBy = new ServicePrincipal("ecs-tasks.amazonaws.com")
         });
 
-        taskRole.AddManagedPolicy(ManagedPolicy.FromAwsManagedPolicyName("service-role/AmazonECSTaskExecutionRolePolicy"));
+        taskRole.AddManagedPolicy(ManagedPolicy.FromAwsManagedPolicyName("CloudWatchLogsFullAccess"));
+
+        //taskRole.AddManagedPolicy(ManagedPolicy.FromAwsManagedPolicyName("service-role/AmazonECSTaskExecutionRolePolicy"));
 
         var taskDefinition = new FargateTaskDefinition(this, "SubsetsixTaskDefinition", new FargateTaskDefinitionProps
         {
             Family = "SubsetsixTaskDefinition",
-            ExecutionRole = taskRole
+            ExecutionRole = taskRole,
+            Cpu = 256,
+            MemoryLimitMiB = 512
         });
 
-        taskDefinition.AddContainer("web", new ContainerDefinitionOptions
+        taskDefinition.AddContainer("api", new ContainerDefinitionOptions
         {
-            Image = ContainerImage.FromDockerImageAsset(asset),
+            Image = ContainerImage.FromEcrRepository(repository, "latest"),
             PortMappings =
             [
                 new PortMapping
                 {
-                    ContainerPort = 80
-                },
-                new PortMapping
-                {
-                    ContainerPort = 443
+                    ContainerPort = 8080,
+                    HostPort = 8080
                 }
-            ],
-            Essential = false
+            ]
         });
-
-        // var service = new FargateService(this, "SubsetsixFargateService", new FargateServiceProps
-        // {
-        //     ServiceName = "SubsetsixFargateService",
-        //     Cluster = cluster,
-        //     DesiredCount = 1,
-        //     TaskDefinition = taskDefinition
-        // });
 
         var service = new ApplicationLoadBalancedFargateService(this, "SubsetsixFargateService",
             new ApplicationLoadBalancedFargateServiceProps
@@ -114,17 +96,17 @@ public class CdkStack : Stack
                 Cluster = cluster,
                 DesiredCount = 2,
                 TaskDefinition = taskDefinition,
-                MemoryLimitMiB = 2048,
+                //MemoryLimitMiB = 2048,
                 PublicLoadBalancer = true
             }
         );
 
-        service.TargetGroup.ConfigureHealthCheck(new HealthCheck()
-        {
-            Path = "/swagger/index.html"
-        });
+        // service.TargetGroup.ConfigureHealthCheck(new HealthCheck
+        // {
+        //     Path = "/health.html"
+        // });
 
-        _ = new CfnOutput(this, "SubsetsixApiEndpoint", new CfnOutputProps { Value = $"http://{service.LoadBalancer.LoadBalancerDnsName}", ExportName = "SubsetsixApiEndpoint" });
+        //_ = new CfnOutput(this, "SubsetsixApiEndpoint", new CfnOutputProps { Value = $"http://{service.LoadBalancer.LoadBalancerDnsName}", ExportName = "SubsetsixApiEndpoint" });
     }
 
     private BastionHostLinux CreateBastionHost(IVpc vpc)

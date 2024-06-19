@@ -9,15 +9,18 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/sdk:8.0.203-alpine3.19-amd64 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["Subsetsix.Api.csproj", "."]
-RUN dotnet restore "./Subsetsix.Api.csproj"
+COPY *.sln .
+COPY ["Subsetsix.Api.csproj", "Subsetsix.Api/"]
+COPY ["Subsetsix.Api.Common/Subsetsix.Api.Common.csproj", "Subsetsix.Api.Common/"]
+COPY ["Subsetsix.ServiceDefaults/Subsetsix.ServiceDefaults.csproj", "Subsetsix.ServiceDefaults/"]
+RUN dotnet restore "Subsetsix.Api/Subsetsix.Api.csproj"
 COPY . .
-WORKDIR "/src/."
-RUN dotnet build "./Subsetsix.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/src/Subsetsix.Api"
+RUN dotnet build "Subsetsix.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./Subsetsix.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "Subsetsix.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app

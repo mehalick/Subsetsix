@@ -2,6 +2,10 @@
 
 ###
 
+GET {{BaseUrl}}/health
+
+###
+
 GET {{BaseUrl}}/items.list
 Accept: application/json
 
